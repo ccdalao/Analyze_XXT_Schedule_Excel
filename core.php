@@ -282,7 +282,7 @@ function Analyze_TTWeek_data($Data, $NowWeekNuber) {
 
 
 //解析Excel源文件
-$C_Analyze_Excel        =      Analyze_Excel("Excel_ke/", "彭文龙");
+$C_Analyze_Excel        =      Analyze_Excel("Excel_ke/", "彭文凤");
 //目标周数 
 $C_Target_WeekNumber    =      5;
 //对源数据初步解析
