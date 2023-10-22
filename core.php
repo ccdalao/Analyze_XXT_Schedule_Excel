@@ -280,19 +280,32 @@ function Analyze_TTWeek_data($Data, $NowWeekNuber) {
 }
 
 
+// 检查是否存在 'day' 和 'lesson' GET 参数
+if (isset($_GET['day']) && isset($_GET['lesson']) && isset($_GET['tgweek'])) {
+    $day = $_GET['day'];
+    $lesson = $_GET['lesson'];
+    $tgweek = $_GET['tgweek'];
+    //解析Excel源文件
+    $C_Analyze_Excel        =      Analyze_Excel("Excel_ke/", "彭文龙");
+    //目标周数 
+    $C_Target_WeekNumber    =      $tgweek;
+    //对源数据初步解析
+    $C_Analyze_timetable    =      Analyze_timetable($C_Analyze_Excel[$day][$lesson]);
+    //对解析后的数据进行课程周数解析
+    $C_Analyze_TTWeek_data  =      Analyze_TTWeek_data($C_Analyze_timetable,$C_Target_WeekNumber);
+    
+    //转为json输出
+    $C_jsondata = json_encode($C_Analyze_TTWeek_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-//解析Excel源文件
-$C_Analyze_Excel        =      Analyze_Excel("Excel_ke/", "彭文凤");
-//目标周数 
-$C_Target_WeekNumber    =      5;
-//对源数据初步解析
-$C_Analyze_timetable    =      Analyze_timetable($C_Analyze_Excel["周五"]['1']);
-//对解析后的数据进行课程周数解析
-$C_Analyze_TTWeek_data  =      Analyze_TTWeek_data($C_Analyze_timetable,$C_Target_WeekNumber);
+    echo($C_jsondata);
+} else {
+    
+    
+    // 如果缺少参数，显示错误消息或执行其他操作
+    echo "缺少参数，请提供 'day' 和 'lesson' 以及'tgweek' 参数。";
+    
+    
+}
 
 
-//转为json输出
-$C_jsondata = json_encode($C_Analyze_TTWeek_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-
-echo($C_jsondata);
