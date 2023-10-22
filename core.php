@@ -229,7 +229,7 @@ function Analyze_timetable($tableValue) {
             $courseInfoArray[] = [
                 '课程名称' => $courseInfo[0],
                 '学校' => $courseInfo[1],
-                '教师' => $courseInfo[2],
+                '教师' => $courseInfo[2]=preg_replace('/【(.+?)】/', '', $courseInfo[2]),
                 '地点' => $courseInfo[3],
                 '周数' => $formattedWeekInfo,
                 '周类型' => $weekType
@@ -252,7 +252,47 @@ function Analyze_timetable($tableValue) {
 }
 
 
+/*************处理Analyze_timetable中的周数信息数据***********/
+//由于学习通Excel课程表上只有9-12周，甚至同一单元格有2门课程在不同的周数中上课
+//因此Analyze_timetable中解析的数据无法判断具体某周是否有课，以及上什么课
+//需要对周数进行处理，以便获取某周应该上某课 例如8周上机械创新设计(理论)，9周应该上机械制造技术基础(理论)
+//需要传入Analyze_timetable的初步解析数据
+//需要传入某个周数，例如8，则会解析出第八周的实际课程，如果没有则返回null
+function Analyze_TTWeek_data($Data, $NowWeekNuber) {
+    
+    $foundCourses = array();
+    foreach ($Data as $course) {
+        $weekNumbers = explode(",", $course["周数"]);
+        if (in_array($NowWeekNuber, $weekNumbers)) {
+            $foundCourses[] = array(
+                "课程名称" => $course["课程名称"],
+                "地点" => $course["地点"],
+                "老师"=>$course["教师"],
+            );
+        }
+    }
+
+    if (empty($foundCourses)) {
+        return null;
+    } else {
+        return $foundCourses;
+    }
+}
 
 
 
-var_dump(Analyze_timetable(Analyze_Excel("Excel_ke/", "彭文龙")["周五"]['1']));
+//解析Excel源文件
+$C_Analyze_Excel        =      Analyze_Excel("Excel_ke/", "彭文龙");
+//目标周数 
+$C_Target_WeekNumber    =      5;
+//对源数据初步解析
+$C_Analyze_timetable    =      Analyze_timetable($C_Analyze_Excel["周五"]['1']);
+//对解析后的数据进行课程周数解析
+$C_Analyze_TTWeek_data  =      Analyze_TTWeek_data($C_Analyze_timetable,$C_Target_WeekNumber);
+
+
+//转为json输出
+$C_jsondata = json_encode($C_Analyze_TTWeek_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+
+echo($C_jsondata);
